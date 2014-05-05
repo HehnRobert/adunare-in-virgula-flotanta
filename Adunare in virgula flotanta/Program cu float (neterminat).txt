@@ -1,0 +1,292 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<conio.h>
+
+FILE *f;
+
+typedef struct 
+{
+	int semn;
+	int exponent[8], mantissa[23];
+}numar;
+numar numar1, numar2, rezultat;
+char n1[33], n2[33];
+
+void read()
+{
+	f = fopen("in.txt", "r");
+	fscanf(f, "%s %s", n1, n2);
+	fclose(f);
+}
+
+void set()
+{
+	numar1.semn = n1[0] - '0';
+	numar2.semn = n2[0] - '0';
+	for (int i = 0; i < 23; i++)
+	{
+		if (i < 8)
+		{
+			numar1.exponent[i] = n1[i + 1] - '0';
+			numar2.exponent[i] = n2[i + 1] - '0';
+		}
+		numar1.mantissa[i] = n1[i + 9] - '0';
+		numar2.mantissa[i] = n2[i + 9] - '0';
+	}
+}
+
+/*int addmantissa(int x1[24], int x2[24], int rez[24])
+{
+	int carry = 0;
+	for (int i = 22; i >= 0; i--)
+	{
+		rez[i] = x1[i] + x2[i] + carry;
+		if (rez[i] == 2) {
+			carry = 1;
+			rez[i] = 0;
+		}
+		else if (rez[i] == 3) {
+			carry = 1;
+			rez[i] = 1;
+		}
+		else carry = 0;
+	}
+	return carry;
+}
+
+float mantissa2to10(int x[23]){
+	float rez = 1;
+	for (int i = 0; i < 23; i++){
+		rez += (x[i] * pow(2, (-i - 1)));
+	}
+	return rez;
+}
+
+void mantissa10to2(float x){
+	int vec[23];
+	long xx = x*pow(10, 16)-(1*pow(10,16));
+	printf("\n%.16f\n%lu",x, xx);
+	for (int i = 22; i >= 0; i--){
+		vec[i] = xx % 2;
+		xx /= 2;
+	}
+	printf("\n");
+	for (int i = 0; i < 23; i++){
+		printf("%d", vec[i]);
+	}
+}
+
+void addexponent(int x1[8], int x2[8], int rez[8])
+{
+	int carry = 0;
+	for (int i = 7; i >= 0; i--)
+	{
+		rez[i] = x1[i] + x2[i] + carry;
+		if (rez[i] == 2) {
+			carry = 1;
+			rez[i] = 0;
+		}
+		else if (rez[i] == 3) {
+			carry = 1;
+			rez[i] = 1;
+		}
+		else carry = 0;
+	}
+	if (carry == 1){
+		printf("EROARE: EXPONENT DEPASIT!!!");
+		_getch();
+		exit;
+	}
+}
+
+void add()
+{
+	if ((numar1.semn == 0) && (numar2.semn == 0))
+	{
+		int okexponent = 1;
+		for (int i = 0; i < 8; i++)
+		{
+			if (numar1.exponent[i] != numar2.exponent[i]) {
+				okexponent = 0; break;
+			}
+		}
+		if (okexponent)
+		{
+			int carry = addmantissa(numar1.mantissa, numar2.mantissa, rezultat.mantissa);
+			if (carry == 1)
+			{
+				int x[8] = { 0, 0, 0, 0, 0, 0, 0, 1 };
+				addexponent(numar1.exponent, x, rezultat.exponent);
+			}
+			else
+			{
+				int x[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+				addexponent(numar1.exponent, x, rezultat.exponent);
+			}
+		}
+	}
+}
+
+void print(numar x)
+{
+	printf("  %d ", x.semn);
+	for (int i = 0; i < 8; i++)
+	{
+		printf("%d", x.exponent[i]);
+	}
+	printf(" ");
+	for (int i = 0; i < 23; i++)
+	{
+		printf("%d", x.mantissa[i]);
+	}
+	printf("\n");
+}
+
+void tranas(){
+	int n1 = 0, v[24] = { 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	for (int i = 0; i < 24; i++)
+		n1 = ((n1 << 1) | v[i]);
+	printf("\n%d", n1);
+}*/
+
+unsigned int transmant(int v[23])//calculez mantissa/exponentul sub forma de int (din baza 2 in baza 10)
+{
+	int n=0;
+	for (int i = -1; i < 23; i++)
+	{
+		if (i == -1) n = ((n << 1) | 1);
+		else n = ((n << 1) | v[i]);
+	}
+	return n;
+}
+
+int transexp(int v[8])
+{
+	int n = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		n = ((n << 1) | v[i]);
+	}
+	return (n - 127);
+}
+
+int swap(unsigned int *m1,unsigned int *m2, int *e1, int *e2,int *rez)//daca trebuie, fac swap si stabilesc exponentul rezultatului
+{
+	if (((*e1) - (*e2)) < 0)
+	{
+		unsigned int aux1;
+		int aux2;
+		aux1 = (*m1);
+		(*m1) = (*m2);
+		(*m2) = aux1;
+		aux2 = (*e1);
+		(*e1) = (*e2);
+		(*e2) = aux2;
+		aux1 = numar1.semn;
+		numar1.semn = numar2.semn;
+		numar2.semn = aux1;
+	}
+	(*rez) = (*e1);
+	return (*e1) - (*e2);
+}
+
+void sign(unsigned int *m)//complementez ultimii 24 de biti (pt ca ne folosim doar de cei 24)
+{
+	for (int i = 0; i < 24; i++)
+	{
+		(*m) = ((*m) ^ (1 << i));
+	}
+	(*m) = (*m) | 1;
+}
+
+unsigned int verifbit(unsigned int nr,int poz)//(verific ce bit e pe pozitia poz din numarul nr
+{
+	return (0 | (nr >> poz));
+}
+
+unsigned int shiftmantc(unsigned int *mantn2, unsigned int x)//shiftarea mantissei daca aceasta a fost complementata
+{
+	unsigned int bit = 0;
+	for (int i = 1; i <= x; i++)
+	{
+		bit = (bit << 1) | verifbit(mantn2, 0);
+		(*mantn2) = ((*mantn2) >> 1) | (1 << 24);
+	}
+	return bit;//returnez bit (g,r,s)
+}
+
+unsigned int shiftmant(unsigned int *mantn2, unsigned int x)//shiftarea mantissei daca aceasta nu a fost complementata
+{
+	unsigned int bit = 0;
+	for (int i = 1; i <= x; i++)
+	{
+		bit = (bit << 1) | verifbit(mantn2, 0);
+		(*mantn2) = (*mantn2) >> 1;
+	}
+	return bit;//returnez bit (g,r,s)
+}
+
+unsigned int sum(unsigned int mantn1, unsigned int mantn2, unsigned int *rez)//calculez suma mantisselor
+{
+	(*rez) = mantn1 + mantn2;
+	return verifbit((*rez), 24);//returnez daca am carry out
+}
+
+int main()
+{
+	unsigned int mantn1, mantn2, mantrez, exprez, shift, cout, bit;
+	int expn1, expn2;
+	//float nrr1,nrr2,w=1.23;
+	read();
+	set();
+	/*add();
+	print(numar1);
+	print(numar2);
+	print(rezultat);
+	nrr1 = mantissa2to10(numar1.mantissa);
+	printf("%.16f", nrr1);
+	nrr2 = mantissa2to10(numar2.mantissa);
+	printf("\n%.16f", nrr2);
+	nrr1 += nrr2;
+	nrr1--;
+	mantissa10to2(nrr1);
+	printf("\n\n%d", (int)(1.5*pow(2, 23)));
+	trans();*/
+	mantn1 = transmant(numar1.mantissa);
+	mantn2 = transmant(numar2.mantissa);
+	expn1 = transexp(numar1.exponent);
+	expn2 = transexp(numar2.exponent);
+	shift = swap(&mantn1, &mantn2, &expn1, &expn2, &exprez);
+	/*if (numar1.semn == numar2.semn)
+	{
+		rezultat.semn = numar1.semn;
+		bit = shiftmant(&mantn2, shift);
+	}*/
+	else
+	{
+		sign(&mantn2);
+		bit = shiftmantc(&mantn2, shift);
+	}
+	cout = sum(mantn1, mantn2, &mantrez);
+	if (numar1.semn != numar2.semn && cout == 0 && verifbit(mantrez, 31))
+	{
+		sign(&mantrez);
+	}
+	if (cout && numar1.semn != numar2.semn)
+	{
+		if (verifbit(mantrez, 22) == 1)
+		{
+			mantrez = ((mantrez << 1) | verifbit(bit, 0));
+			exprez--;
+		}
+	}
+	if (cout && numar1.semn == numar2.semn)
+	{
+		int ultimbit = verifbit(mantrez, 0);
+		mantrez = ((mantrez >> 1) | (1 << 24));
+		exprez++;
+	}
+	printf("\n\n%u\n%u\n%d\n%d", mantn1, mantn2,expn1,expn2);
+	_getch();
+	return 0;
+}
