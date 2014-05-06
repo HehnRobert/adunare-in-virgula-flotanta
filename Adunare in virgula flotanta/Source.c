@@ -331,4 +331,4 @@ int main()
 	printf("\n\n\t\t\t\t\t\tProgram incheiat cu succes!");
 	_getch();
 	return 0;
-}//ATENTIE, am schimbat exprez din unsigned int int INT
+}//ATENTIE, am schimbat exprez din unsigned int int INT!
