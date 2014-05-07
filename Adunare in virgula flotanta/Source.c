@@ -96,7 +96,8 @@ void sign(unsigned int *m)//complementez ultimii 23 de biti (pt ca ne folosim do
 	{
 		(*m) = ((*m) ^ (1 << i));
 	}
-	if (verifbit((*m), 0) == 0)
+	(*m)++;
+	/*if (verifbit((*m), 0) == 0)
 		(*m) = (*m) | 1;
 	else
 	{
@@ -108,7 +109,7 @@ void sign(unsigned int *m)//complementez ultimii 23 de biti (pt ca ne folosim do
 			else break;
 			i++;
 		}
-	}
+	}*/
 }
 
 unsigned int verifbit(unsigned int nr,int poz)//(verific ce bit e pe pozitia poz din numarul nr
@@ -121,7 +122,7 @@ unsigned int shiftmantc(unsigned int *mantn, unsigned int x)//shiftarea mantisse
 	unsigned int bit = 0;
 	for (int i = 1; i <= x; i++)
 	{
-		bit = (bit << 1) | verifbit(mantn, 0);
+		bit = ((bit << 1) | verifbit(mantn, 0));
 		(*mantn) = ((*mantn) >> 1) | (1 << 23);
 	}
 	return bit;//returnez bit (g,r,s)
@@ -278,6 +279,12 @@ int main()
 		sign(&mantrez);
 		ifcomplement = 1;
 	}
+	if (numar1.semn != numar2.semn)
+	{
+		while (verifbit(mantrez, 23) == 0) {
+			mantrez <<= 1; exprez--;
+		}
+	}
 	if (cout && numar1.semn == numar2.semn)//pasul 6
 	{
 		//bit = bit << 1 | verifbit(mantrez, 0);
@@ -327,7 +334,6 @@ int main()
 
 
 	//*********************TEST*********************//
-	printf("\n\n\n%d  %u  %u", rezultat.semn,exprez,mantrez);
 	printf("\n\n\t\t\t\t\t\tProgram incheiat cu succes!");
 	_getch();
 	return 0;
