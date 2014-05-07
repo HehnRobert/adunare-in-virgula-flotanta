@@ -279,13 +279,13 @@ int main()
 		sign(&mantrez);
 		ifcomplement = 1;
 	}
-	if (numar1.semn != numar2.semn)
+	if (numar1.semn != numar2.semn)//pasul 6
 	{
 		while (verifbit(mantrez, 23) == 0) {
 			mantrez <<= 1; exprez--;
 		}
 	}
-	if (cout && numar1.semn == numar2.semn)//pasul 6
+	if (cout && numar1.semn == numar2.semn)
 	{
 		//bit = bit << 1 | verifbit(mantrez, 0);
 		z0 = verifbit(mantrez, 0);
