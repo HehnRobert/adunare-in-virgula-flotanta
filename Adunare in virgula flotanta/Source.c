@@ -1,3 +1,7 @@
+//------------------------------------------ADUNARE IN VIRGULA FLOTANTA------------------------------------------//
+//-----------------------------------------------STANDARD IEEE 754-----------------------------------------------//
+//******************************************Varga Andreea & Hehn Robert******************************************//
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<conio.h>
@@ -118,7 +122,7 @@ unsigned int verifbit(unsigned int nr,int poz)//(verific ce bit e pe pozitia poz
 }
 
 unsigned int shiftmantc(unsigned int *mantn, unsigned int x)//shiftarea mantissei daca aceasta a fost complementata
-{
+{//TESTAT - OK
 	unsigned int bit = 0;
 	for (int i = 1; i <= x; i++)
 	{
@@ -129,7 +133,7 @@ unsigned int shiftmantc(unsigned int *mantn, unsigned int x)//shiftarea mantisse
 }
 
 unsigned int shiftmant(unsigned int *mantn, unsigned int x)//shiftarea mantissei daca aceasta nu a fost complementata
-{
+{//TESTAT - OK
 	unsigned int bit = 0;
 	for (int i = 1; i <= x; i++)
 	{
@@ -140,13 +144,13 @@ unsigned int shiftmant(unsigned int *mantn, unsigned int x)//shiftarea mantissei
 }
 
 unsigned int sum(unsigned int mantn1, unsigned int mantn2, unsigned int *rez)//calculez suma mantisselor
-{
+{//TESTAT - OK
 	(*rez) = mantn1 + mantn2;
 	return verifbit((*rez), 24);//returnez daca am carry out
 }
 
 void adjust_r_s(unsigned int *b, int d, unsigned int *r, unsigned int *s,unsigned int z0,unsigned int shift)
-{
+{//TESTAT - OK
 	if (d == 1)
 	{
 		(*r) = z0;
@@ -181,7 +185,7 @@ void adjust_r_s(unsigned int *b, int d, unsigned int *r, unsigned int *s,unsigne
 }
 
 void rounding(unsigned int r,unsigned int s,unsigned int *zm,int *exp)
-{
+{//TESTAT - OK
 	unsigned int zon = verifbit((*zm), 0);
 	if (r&(zon | s))
 	{
@@ -195,7 +199,7 @@ void rounding(unsigned int r,unsigned int s,unsigned int *zm,int *exp)
 }
 
 void sign_result(int ifs,int ifc)
-{
+{//TESTAT - OK
 	if (ifs)
 	{
 		if ((numar1.semn = 0) && (numar2.semn = 1)) rezultat.semn = 1;
@@ -217,7 +221,7 @@ void sign_result(int ifs,int ifc)
 }
 
 void pack(int expr,unsigned int mantr)
-{
+{//TESTAT - OK
 	int i,vecexp[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }, vecmant[23] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	f = fopen("in.txt", "a");
 	fprintf(f, "\n\nRezultat:\n");
@@ -251,35 +255,53 @@ void pack(int expr,unsigned int mantr)
 
 int main()
 {
+	//--------------Declarations---------------//
 	unsigned int mantn1, mantn2, mantrez, shift, cout, bit, R, S,z0=0;//bit -> (g,r,s)
 	int expn1, expn2, exprez, test = 0, deplasare = 0, ifswap = 0, ifcomplement = 0;
+	//=========================================//
+
+	//-----------------Pasul 1-----------------//
 	read();
 	set();
 	mantn1 = transmant(numar1.mantissa);
 	mantn2 = transmant(numar2.mantissa);
 	expn1 = transexp(numar1.exponent);
 	expn2 = transexp(numar2.exponent);
-	//printf("\n\n%u\n%u\n%d\n%d\n\n", mantn1, mantn2, expn1, expn2);
-	shift = swap(&mantn1, &mantn2, &expn1, &expn2, &exprez,&ifswap);//pasul 2
-	//printf("\n\n%u\n%u\n%d\n%d\n%d\n\n", mantn1, mantn2, expn1, expn2,shift); ->TESTARE SWAP !ok!
-	if (numar1.semn == numar2.semn)//preshifting
+	//=========================================//
+
+	//-----------------Pasul 2-----------------//
+	shift = swap(&mantn1, &mantn2, &expn1, &expn2, &exprez,&ifswap);
+	//=========================================//
+	
+	//-----------------Pasul 4-----------------//
+	if (numar1.semn == numar2.semn)
 	{
 		rezultat.semn = numar1.semn;
-		bit = shiftmant(&mantn2, shift);//pasul 4
+		bit = shiftmant(&mantn2, shift);
 	}
 	else
 	{
-		sign(&mantn2);//pasul 3
-		bit = shiftmantc(&mantn2, shift);//pasul 4
+
+		//-----------------Pasul 3-----------------//
+		sign(&mantn2); 
+		//=========================================//
+
+		bit = shiftmantc(&mantn2, shift);
 	}
-	cout = sum(mantn1, mantn2, &mantrez);//pasul 5
+	//=========================================//
+
+	//-----------------Pasul 5-----------------//
+	cout = sum(mantn1, mantn2, &mantrez);
 	if(cout) mantrez = mantrez & (~(1 << 24));//sterg cout din mantissa rezultatului
-	if (numar1.semn != numar2.semn && cout == 0 && verifbit(mantrez, 23))//pasul 5
+	if (numar1.semn != numar2.semn && cout == 0 && verifbit(mantrez, 23))
 	{
 		sign(&mantrez);
 		ifcomplement = 1;
 	}
-	if (numar1.semn != numar2.semn)//pasul 6
+	//=========================================//
+
+	//-----------------Pasul 6-----------------//
+	if (numar1.semn != numar2.semn)
 	{
 		while (verifbit(mantrez, 23) == 0) {
 			mantrez <<= 1; exprez--;
@@ -287,7 +309,6 @@ int main()
 	}
 	if (cout && numar1.semn == numar2.semn)
 	{
-		//bit = bit << 1 | verifbit(mantrez, 0);
 		z0 = verifbit(mantrez, 0);
 		mantrez = ((mantrez >> 1) | (1 << 23));//nu mai avem nevoie de g -> r devine ce am scos din mantrez si restul este s
 		exprez++;
@@ -310,9 +331,7 @@ int main()
 			}
 		}
 	}
-
-
-
+	//=========================================//
 
 	//-----------------Pasul 7-----------------//
 	adjust_r_s(&bit, deplasare, &R, &S,z0,shift);
@@ -337,4 +356,8 @@ int main()
 	printf("\n\n\t\t\t\t\t\tProgram incheiat cu succes!");
 	_getch();
 	return 0;
-}//ATENTIE, am schimbat exprez din unsigned int int INT!
+}
+
+//------------------------------------------ADUNARE IN VIRGULA FLOTANTA------------------------------------------//
+//-----------------------------------------------STANDARD IEEE 754-----------------------------------------------//
+//******************************************Varga Andreea & Hehn Robert******************************************//
